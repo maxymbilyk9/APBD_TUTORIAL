@@ -3,8 +3,8 @@ namespace Tutorial1.model.container;
 public interface IContainer
 {
 
-    void Load(int cargoWeight);
+    void Load(double cargoWeight);
 
-    int Unload();
+    double Unload();
 
 }

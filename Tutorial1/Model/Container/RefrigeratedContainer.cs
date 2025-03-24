@@ -4,11 +4,11 @@ using Tutorial1.model.product;
 namespace Tutorial1.model.container;
 
 public
-    class RefrigeratedContainer(int cargoWeight, int height, int weight, int maxCargoWeight, ProductType productType, double temperature)
-    : AbstractContainer(cargoWeight, height, weight, maxCargoWeight)
+    class RefrigeratedContainer(double cargoWeightKg, double heightCm, double weightKg, double maxCargoWeightKg, ProductType productType, double temperature)
+    : AbstractContainer(cargoWeightKg, heightCm, weightKg, maxCargoWeightKg)
 {
 
-    public static readonly Dictionary<ProductType, double> ProductTypeTemperature = new()
+    protected static readonly Dictionary<ProductType, double> ProductTypeTemperatureDict = new()
         {
             { ProductType.Banana , 13.3},
             { ProductType.Chocolate , 18},
@@ -31,7 +31,7 @@ public
         get { return _temperature; }
         set
         {
-            double minTemperature = ProductTypeTemperature[StoredProductType];
+            double minTemperature = ProductTypeTemperatureDict[StoredProductType];
             if (value < minTemperature)
             {
                 throw new LowTemperatureException(
@@ -44,28 +44,42 @@ public
 
 
 
-    public override void Load(int cargoWeight)
+    public override void Load(double cargoWeight)
     {
-        int possibleWeight = CargoWeight + cargoWeight;
+        double possibleWeight = CargoWeightKg + cargoWeight;
 
-        if (possibleWeight > MaxCargoWeight)
+        if (possibleWeight > MaxCargoWeightKg)
         {
-            throw new OverfillException(String.Format(DEFAULT_OVERFILL_MESSAGE, SerialNumber, MaxCargoWeight));
+            throw new OverfillException(String.Format(DEFAULT_OVERFILL_MESSAGE, SerialNumber, MaxCargoWeightKg));
         }
 
-        CargoWeight += cargoWeight;
+        CargoWeightKg += cargoWeight;
     }
 
-    public override int Unload()
+    public override double Unload()
     {
-        int unloadedWeight = CargoWeight;
-        CargoWeight -= unloadedWeight;
+        double unloadedWeight = CargoWeightKg;
+        CargoWeightKg -= unloadedWeight;
         return unloadedWeight;
     }
     
     protected override void GenerateSerialNumber()
     {
         SerialNumber = String.Format(AbstractContainer.SERIAL_NUMBER_FORMAT, "C", GetGeneratedContainerId());
+    }
+
+    public static double GetMinimumRequiredTemperature(ProductType productType)
+    {
+        return ProductTypeTemperatureDict[productType];
+    }
+    
+    public override string ToString()
+    {
+        String baseString = base.ToString();
+
+        baseString = baseString.Replace("Container", "Refrigerated Container");
+
+        return $"{baseString}, stored products: {StoredProductType}, temperature: {_temperature}";
     }
     
 }
